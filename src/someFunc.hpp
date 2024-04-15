@@ -28,3 +28,11 @@ vector<double> getX(double a, double b, double h) {
 vector<double> getSpline(vector<double> n, int st, int fn) {
 	return vector<double>(n.begin() + st, n.begin() + fn);
 }
+
+double getDiff(graph a, graph b) {
+	double diff = 0;
+	for (int i = 0; i < a.x.size(); i++) {
+		diff = (diff > abs(a.y[i] - b.y[i])) ? diff : abs(a.y[i] - b.y[i]);
+	}
+	return diff;
+}

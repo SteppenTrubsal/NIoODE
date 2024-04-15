@@ -40,7 +40,7 @@ void secondAdams(double h, string& func, vector<double>& X, vector<double>& Y) {
 		Y[i + 1] = Y[i] + (h / 2) * (3 * fun(func, X[i], Y[i]) - fun(func, X[i - 1], Y[i - 1]));
 	}
 }
-graph secondAdamsMethod(double a, double b, double sol, string& func, double h) {
+graph secondAdamsGraph(double a, double b, double sol, string& func, double h) {
 	graph res;
 	res.name = "Two-step Adams method";
 	res.x = getX(a, b, h);
@@ -57,7 +57,7 @@ void thirdAdams(double h, string& func, vector<double>& X, vector<double>& Y) {
 		Y[i + 1] = Y[i] + (h / 12) * (23 * fun(func, X[i], Y[i]) - 16 * fun(func, X[i - 1], Y[i - 1]) + 5 * fun(func, X[i - 2], Y[i - 2]));
 	}
 }
-graph thirdAdamsMethod(double a, double b, double sol, string& func, double h) {
+graph thirdAdamsGraph(double a, double b, double sol, string& func, double h) {
 	graph res;
 	res.name = "Three-step Adams method";
 	res.x = getX(a, b, h);
@@ -67,4 +67,27 @@ graph thirdAdamsMethod(double a, double b, double sol, string& func, double h) {
 	RungeKutta(h, func, x01, res.y);
 	thirdAdams(h, func, res.x, res.y);
 	return res;
+}
+
+vector<graph> getResultGraphics(double a, double b, double sol, string& func, double h) {
+	vector<graph> result(4);
+	result[0] = EulerGraph(a, b, sol, func, h);
+	result[1] = RungeKuttaGraph(a, b, sol, func, h);
+	result[2] = secondAdamsGraph(a, b, sol, func, h);
+	result[3] = thirdAdamsGraph(a, b, sol, func, h);
+	return result;
+}
+
+vector<graph> getDiffGraph(double a, double b, double n) {
+	double hMax = (b - a) / 10;
+	double hMin = (b - a) / 1000;
+	double it = (hMax - hMin) / n;
+
+	vector<graph> diffGraphics(4);
+	vector<double> OrdinaryGraphics(4);
+	vector<double> X;
+	for (; hMin < hMax; hMin += it) {
+		X.push_back(hMin);
+
+	}
 }
