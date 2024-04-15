@@ -9,4 +9,5 @@ int main() {
 	double h = 1;
 
 	EulerGraph(a, b, solY, func, h);
+	thirdAdamsMethod(a, b, solY, func, h);
 }

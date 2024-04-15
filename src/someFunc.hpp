@@ -24,3 +24,7 @@ vector<double> getX(double a, double b, double h) {
 	}
 	return X;
 }
+
+vector<double> getSpline(vector<double> n, int st, int fn) {
+	return vector<double>(n.begin() + st, n.begin() + fn);
+}
