@@ -9,6 +9,18 @@ double fun(string& fun, double x, double y) {
 	parser.DefineVar("y", &y);
 	return parser.Eval();
 }
+double oneArgFun(string& fun, double x) {
+	mu::Parser parser;
+	parser.SetExpr(fun);
+	parser.DefineVar("x", &x);
+	return parser.Eval();
+}
+void eqRebuild(string& s) {
+	int equalSign = s.find('=');
+	string right = s.substr(equalSign + 1);
+	s.clear();
+	s = right;
+}
 
 struct graph {
 	vector<double> x;

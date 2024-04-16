@@ -69,25 +69,53 @@ graph thirdAdamsGraph(double a, double b, double sol, string& func, double h) {
 	return res;
 }
 
-vector<graph> getResultGraphics(double a, double b, double sol, string& func, double h) {
-	vector<graph> result(4);
+void analSol(double h, string& func, vector<double>& X, vector<double>& Y) {
+	for (int i = 0; i < X.size(); i++) {
+		Y[i] = oneArgFun(func, X[i]);
+	}
+}
+graph analSolGraph(double a, double b, string& func, double h) {
+	graph res;
+	res.name = "Analythical solution";
+	res.x = getX(a, b, h);
+	res.y = vector<double>(res.x.size());
+	analSol(h, func, res.x, res.y);
+	return res;
+}
+
+vector<graph> getResultGraphics(double a, double b, double sol, string& func, double h, string& analSol) {
+	vector<graph> result(5);
+	eqRebuild(analSol);
+
 	result[0] = EulerGraph(a, b, sol, func, h);
 	result[1] = RungeKuttaGraph(a, b, sol, func, h);
 	result[2] = secondAdamsGraph(a, b, sol, func, h);
 	result[3] = thirdAdamsGraph(a, b, sol, func, h);
+	result[4] = analSolGraph(a, b, analSol, h);
+
 	return result;
 }
 
-vector<graph> getDiffGraph(double a, double b, double n) {
+vector<graph> getDiffGraph(double a, double b, double n, double sol, string& func, string& analSol) {
 	double hMax = (b - a) / 10;
 	double hMin = (b - a) / 1000;
 	double it = (hMax - hMin) / n;
 
 	vector<graph> diffGraphics(4);
-	vector<double> OrdinaryGraphics(4);
-	vector<double> X;
-	for (; hMin < hMax; hMin += it) {
-		X.push_back(hMin);
+	vector<double> H;
 
+	for (; hMin <= hMax; hMin += it) {
+		H.push_back(hMin);
 	}
+	for (int i = 0; i < H.size(); i++) {
+		vector<graph> temp = getResultGraphics(a, b, sol, func, H[i], analSol);
+		for (int j = 0; j < diffGraphics.size(); j++) {
+			diffGraphics[j].x.push_back(H[i]);
+		}
+		diffGraphics[0].y.push_back(getDiff(temp[0], temp[4]));
+		diffGraphics[1].y.push_back(getDiff(temp[1], temp[4]));
+		diffGraphics[2].y.push_back(getDiff(temp[2], temp[4]));
+		diffGraphics[3].y.push_back(getDiff(temp[3], temp[4]));
+	}
+	return diffGraphics;
 }

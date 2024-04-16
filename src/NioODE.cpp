@@ -2,12 +2,12 @@
 using namespace std;
 
 int main() {
-	double a = 2, b = 5;
-	double solX = 2, solY = 3;
-	string func = "(1/2*x)*(y-1+x^2/(y-1))";
+	double a = 2.718, b = 5.718;
+	double solX = 2.718, solY = 2;
+	string func = "(1/(x*y))*(y^2/(ln(x))-1)";
+	string analSolution = "y=sqrt(2*(ln(x))^2+2*ln(x))";
 
 	double h = 1;
 
-	EulerGraph(a, b, solY, func, h);
-	thirdAdamsMethod(a, b, solY, func, h);
+	getDiffGraph(a, b, 10, solY, func, analSolution);
 }
