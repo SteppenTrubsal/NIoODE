@@ -9,5 +9,7 @@ int main() {
 
 	double h = 1;
 
-	getDiffGraph(a, b, 10, solY, func, analSolution);
+	//getResultGraphics(a, b, solY, func, 0.1, analSolution);
+	//getDiffGraph(a, b, 10, solY, func, analSolution);
+	return 0;
 }
