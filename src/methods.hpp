@@ -122,16 +122,56 @@ vector<graph> getDiffGraph(double a, double b, double n, double sol, string& fun
 	return diffGraphics;
 }
 
+void diffGraph(vector<graph>& res, double a, double b, double sol, string& func, string& analSol, vector<double> h) {
+	for (size_t i = 0; i < h.size(); i++) {
+		vector<graph> temp = getResultGraphics(a, b, sol, func, h[i], analSol);
+		for (size_t j = 0; j < res.size(); j++) {
+			res[j].x.push_back(h[i]);
+		}
+		res[0].y.push_back(getDiff(temp[0], temp[4]));
+		res[1].y.push_back(getDiff(temp[1], temp[4]));
+		res[2].y.push_back(getDiff(temp[2], temp[4]));
+		res[3].y.push_back(getDiff(temp[3], temp[4]));
+	}
+}
+
 vector<graph> mulThreadDiffGraph(double a, double b, double n, double sol, string& func, string& analSol) {
 	double hMax = (b - a) / 10;
 	double hMin = (b - a) / 1000;
-	double it = (hMax - hMin) / n;
+	double it = (hMax - hMin) / (n - 1);
 
 	vector<graph> diffGraphics(4);
 	vector<double> H;
+	size_t numThreads = thread::hardware_concurrency();
+	vector<vector<double>> Hs(numThreads);
 
-	for (; hMin < hMax; hMin += it) {
-		H.push_back(hMin);
+	for (size_t i = 0; i < n; i++) {
+		H.push_back(hMin + it * i);
 	}
 
+	size_t hIt = H.size() / numThreads;
+	if (hIt == 0) { hIt = 1; }
+	size_t startIdx = 0; size_t endIdx = 0;
+	for (size_t i = 0; i < numThreads; i++) {
+		startIdx = endIdx;
+		endIdx = startIdx + hIt;
+		if (endIdx <= H.size()) {
+			Hs[i] = vector<double>(H.begin() + startIdx, H.begin() + endIdx);
+		}
+	}
+	size_t rem = n - hIt * numThreads;
+	while (rem > 0) {
+		Hs.back().push_back(H[H.size() - rem]);
+		rem--;
+	}
+
+	vector<thread> t;
+	for (size_t i = 0; i < numThreads; i++) {
+		//t.emplace_back(diffGraph, ref(diffGraphics), a, b, sol, func, analSol, Hs[i]);
+	}
+	for (auto& tr : t) {
+        tr.join();
+    }
+
+	return diffGraphics;
 }
