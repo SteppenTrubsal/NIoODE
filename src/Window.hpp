@@ -207,7 +207,7 @@ void Window::renderGUI() {
 	static std::string solution = "sqrt(2*(ln(x))^2+2*ln(x))";
 	static std::string sH = "0.1";
 
-	static bool limExWin 
+	static bool limExWin = false;
 
 	ImGui::SetNextWindowPos(ImVec2(0, 0));
 	ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
@@ -250,7 +250,7 @@ void Window::renderGUI() {
 			std::cerr << e.GetMsg() << std::endl;
 			limExWin = true;
 			isTheResultReady = false;
-			goto exEnd;
+			//goto exEnd;
 		}
 	}
 
