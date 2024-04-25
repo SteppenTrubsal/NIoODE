@@ -35,7 +35,7 @@ private:
 	sf::RenderWindow window;
 	bool isStarted = false;
 	bool isTheResultReady = false;
-	
+	std::vector<graph> res;
 };
 Window::Window() :
 	window(sf::VideoMode(1024, 728), L"LAB 4")
@@ -202,12 +202,12 @@ void Window::renderGUI() {
 	static double limA = 2.7182, limB = 5.7182;
 	static double solX = 2.7182, solY = 2;
 	static double h = 0.1;
-	static std::string sLimA = "e", sLimB = "e+3";
+	static std::string sLimA = "2.7182", sLimB = "5.7182";
 	static std::string equation = "(1/x*y)*((y^2/ln(x))-1)";
 	static std::string solution = "sqrt(2*(ln(x))^2+2*ln(x))";
 	static std::string sH = "0.1";
 
-	static bool limExWin 
+	static bool limExWin = false, isResReady = false;
 
 	ImGui::SetNextWindowPos(ImVec2(0, 0));
 	ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
@@ -252,6 +252,29 @@ void Window::renderGUI() {
 			isTheResultReady = false;
 			goto exEnd;
 		}
+		res = getResultGraphics(limA, limB, solY, equation, h, solution);
+		isTheResultReady = true;
+		if (isTheResultReady) {
+			ImGui::LabelText("##label", uTC(u8"Графики:"));
+
+			for (size_t i = 0; i < res.size(); i++){
+				if (ImPlot::BeginPlot(res[i].name.c_str())) {
+					ImPlot::SetupAxes(uTC(u8"X"), uTC(u8"Y"));
+					ImPlot::PlotLine("##plot", res[i].x.data(), res[i].y.data(), res[i].y.size());
+					ImPlot::EndPlot();
+				}
+			}
+		}
+	}
+
+exEnd:
+	if (limExWin)
+	{
+		ImGui::Begin(uTC(u8"Ошибка!"), &limExWin, ImGuiWindowFlags_AlwaysAutoResize);
+		ImGui::Text(uTC(u8"Неверно введены пределы или функция"));
+		if (ImGui::Button(uTC(u8"Закрыть")))
+			limExWin = false;
+		ImGui::End();
 	}
 
 	ImGui::End();
