@@ -1,4 +1,5 @@
 #include "methods.hpp"
+#include "Window.hpp"
 using namespace std;
 
 int main() {
@@ -11,6 +12,8 @@ int main() {
 
 	//getResultGraphics(a, b, solY, func, 0.1, analSolution);
 	//getDiffGraph(a, b, 10, solY, func, analSolution);
-	mulThreadDiffGraph(a, b, 100, solY, func, analSolution);
+	/*mulThreadDiffGraph(a, b, 100, solY, func, analSolution);*/
+	Window window;
+	window.start();
 	return 0;
 }
