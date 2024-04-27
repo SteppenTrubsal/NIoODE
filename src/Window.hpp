@@ -250,7 +250,7 @@ void Window::renderGUI() {
 			std::cerr << e.GetMsg() << std::endl;
 			limExWin = true;
 			isTheResultReady = false;
-			goto exEnd;
+			//goto exEnd;
 		}
 		res = getResultGraphics(limA, limB, solY, equation, h, solution);
 		isTheResultReady = true;

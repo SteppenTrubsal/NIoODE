@@ -1,6 +1,7 @@
 #include "someFunc.hpp"
 #include <thread>
 #include <mutex>
+#include <functional>
 using namespace std;
 
 void Euler(double h, string& func, vector<double>& X, vector<double>& Y) {
@@ -122,9 +123,10 @@ vector<graph> getDiffGraph(double a, double b, double n, double sol, string& fun
 	return diffGraphics;
 }
 
-void diffGraph(vector<graph>& res, double a, double b, double sol, string& func, string& analSol, vector<double> h) {
+void diffGraph(vector<graph>& res, double a, double b, double sol, string& func, string& analSol, vector<double> h, std::mutex& graphMutex) {
 	for (size_t i = 0; i < h.size(); i++) {
 		vector<graph> temp = getResultGraphics(a, b, sol, func, h[i], analSol);
+		std::lock_guard<std::mutex> lock(graphMutex);
 		for (size_t j = 0; j < res.size(); j++) {
 			res[j].x.push_back(h[i]);
 		}
@@ -139,7 +141,7 @@ vector<graph> mulThreadDiffGraph(double a, double b, double n, double sol, strin
 	double hMax = (b - a) / 10;
 	double hMin = (b - a) / 1000;
 	double it = (hMax - hMin) / (n - 1);
-
+	std::mutex graphMutex;
 	vector<graph> diffGraphics(4);
 	vector<double> H;
 	size_t numThreads = thread::hardware_concurrency();
@@ -167,7 +169,7 @@ vector<graph> mulThreadDiffGraph(double a, double b, double n, double sol, strin
 
 	vector<thread> t;
 	for (size_t i = 0; i < numThreads; i++) {
-		//t.emplace_back(diffGraph, ref(diffGraphics), a, b, sol, func, analSol, Hs[i]);
+		t.push_back(std::thread([&]() {diffGraph(diffGraphics, a, b, sol, func, analSol, Hs[i], graphMutex); }));
 	}
 	for (auto& tr : t) {
         tr.join();
