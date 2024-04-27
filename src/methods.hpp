@@ -2,6 +2,7 @@
 #include <thread>
 #include <mutex>
 #include <functional>
+#include <fstream>
 using namespace std;
 
 void Euler(double h, string& func, vector<double>& X, vector<double>& Y) {
@@ -88,7 +89,6 @@ graph analSolGraph(double a, double b, string& func, double h) {
 
 vector<graph> getResultGraphics(double a, double b, double sol, string& func, double h, string& analSol) {
 	vector<graph> result(5);
-	eqRebuild(analSol);
 
 	result[0] = EulerGraph(a, b, sol, func, h);
 	result[1] = RungeKuttaGraph(a, b, sol, func, h);
@@ -102,13 +102,17 @@ vector<graph> getResultGraphics(double a, double b, double sol, string& func, do
 vector<graph> getDiffGraph(double a, double b, double n, double sol, string& func, string& analSol) {
 	double hMax = (b - a) / 10;
 	double hMin = (b - a) / 1000;
-	double it = (hMax - hMin) / n;
+	double it = (hMax - hMin) / (n-1);
 
 	vector<graph> diffGraphics(4);
 	vector<double> H;
+	diffGraphics[0].name = "Euler";
+	diffGraphics[1].name = "Runge-Kutta";
+	diffGraphics[2].name = "Two-step Adams method";
+	diffGraphics[3].name = "Three-step Adams method";
 
-	for (; hMin < hMax; hMin += it) {
-		H.push_back(hMin);
+	for (size_t i = 0; i < n; i++) {
+		H.push_back(hMin + it * i);
 	}
 	for (size_t i = 0; i < H.size(); i++) {
 		vector<graph> temp = getResultGraphics(a, b, sol, func, H[i], analSol);
@@ -125,8 +129,12 @@ vector<graph> getDiffGraph(double a, double b, double n, double sol, string& fun
 
 void diffGraph(vector<graph>& res, double a, double b, double sol, string& func, string& analSol, vector<double> h, std::mutex& graphMutex) {
 	for (size_t i = 0; i < h.size(); i++) {
+
 		vector<graph> temp = getResultGraphics(a, b, sol, func, h[i], analSol);
+
 		std::lock_guard<std::mutex> lock(graphMutex);
+		cout << this_thread::get_id() << endl;
+
 		for (size_t j = 0; j < res.size(); j++) {
 			res[j].x.push_back(h[i]);
 		}
@@ -147,6 +155,11 @@ vector<graph> mulThreadDiffGraph(double a, double b, double n, double sol, strin
 	size_t numThreads = thread::hardware_concurrency();
 	vector<vector<double>> Hs(numThreads);
 
+	diffGraphics[0].name = "Euler";
+	diffGraphics[1].name = "Runge-Kutta";
+	diffGraphics[2].name = "Two-step Adams method";
+	diffGraphics[3].name = "Three-step Adams method";
+
 	for (size_t i = 0; i < n; i++) {
 		H.push_back(hMin + it * i);
 	}
@@ -161,7 +174,7 @@ vector<graph> mulThreadDiffGraph(double a, double b, double n, double sol, strin
 			Hs[i] = vector<double>(H.begin() + startIdx, H.begin() + endIdx);
 		}
 	}
-	size_t rem = n - hIt * numThreads;
+	int rem = n - hIt * numThreads;
 	while (rem > 0) {
 		Hs.back().push_back(H[H.size() - rem]);
 		rem--;
@@ -169,11 +182,13 @@ vector<graph> mulThreadDiffGraph(double a, double b, double n, double sol, strin
 
 	vector<thread> t;
 	for (size_t i = 0; i < numThreads; i++) {
-		t.push_back(std::thread([&]() {diffGraph(diffGraphics, a, b, sol, func, analSol, Hs[i], graphMutex); }));
+		if (Hs[i].size() != 0) {
+			t.emplace_back(std::thread([&]() {diffGraph(diffGraphics, a, b, sol, func, analSol, Hs[i], graphMutex); }));
+		}
+		cout << i << "bebra" << endl;
 	}
 	for (auto& tr : t) {
         tr.join();
     }
-
 	return diffGraphics;
 }

@@ -12,7 +12,6 @@ public:
 	Window();
 	~Window();
 
-
 	void start();
 	void stop();
 private:
@@ -36,6 +35,7 @@ private:
 	bool isStarted = false;
 	bool isTheResultReady = false;
 	std::vector<graph> res;
+	std::vector<graph> diffGraph;
 };
 Window::Window() :
 	window(sf::VideoMode(1024, 728), L"LAB 4")
@@ -103,109 +103,20 @@ void Window::mainLoop()
 	ImGui::SFML::Shutdown();
 	ImPlot::DestroyContext();
 }
-	/*static int number = 10;
-	static bool limExWin = false;
-	static std::string funk = "(1-6*x)*exp(2*x)";
-	static std::string lim1 = "0", lim2 = "2/3", preciseMeaningStr = "-2";
-	static double dLim1 = 0, dLim2 = 2./3., preciseMeaning = -2.;
-
-
-	ImGui::SetNextWindowPos(ImVec2(0, 0));
-	ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
-	ImGui::Begin("Main Window", nullptr,
-		ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoCollapse |
-		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoBringToFrontOnFocus);
-	ImGui::LabelText("##label", uTC(u8"Численное интегрирование: "));
-
-	ImGui::BeginGroup();
-	ImGui::LabelText("##label", uTC(u8"Введите подынтегральное выражение (без dx):"));
-	ImGui::InputText("##TBf", &funk);
-	ImGui::EndGroup();
-
-	ImGui::SameLine();
-	ImGui::BeginGroup();
-	ImGui::LabelText("##label", uTC(u8"Введите пределы интегрирования:"));
-	ImGui::InputText("##TBl1", &lim1);
-
-	ImGui::InputText("##TBl2", &lim2);
-	ImGui::EndGroup();
-	float windowWidth = ImGui::GetContentRegionAvail().x;
-
-
-	float sliderWidth = windowWidth / 3.0f;
-
-
-	ImGui::PushItemWidth(sliderWidth);
-	ImGui::SliderInt(uTC(u8"Кол-во"), &number, 0, 500);
-	ImGui::SameLine();
-	ImGui::InputText(uTC(u8"Точное значение"), &preciseMeaningStr);
-	ImGui::PopItemWidth();
-	if (ImGui::Button(uTC(u8"Рассчитать")))
-	{
-		mu::Parser parser;
-
-		try
-		{
-			parser.SetExpr(lim1);
-			dLim1 = parser.Eval();
-			parser.SetExpr(lim2);
-			dLim2 = parser.Eval();
-			parser.SetExpr(preciseMeaningStr);
-			preciseMeaning = parser.Eval();
-			res = getRes(dLim1, dLim2, funk, preciseMeaning, number);
-
-		}
-		catch (mu::Parser::exception_type& e)
-		{
-			std::cerr << e.GetMsg() << std::endl;
-			limExWin = true;
-			isTheResultReady = false;
-			goto exEnd;
-		}
-		isTheResultReady = true;
-
-	}
-	if (isTheResultReady)
-	{
-		{
-			ImGui::LabelText("##label", uTC(u8"Графики:"));
-
-			for (size_t i = 0; i < res.size(); i++)
-			{
-				if (ImPlot::BeginPlot(res[i].name.c_str())) {
-					ImPlot::SetupAxes(uTC(u8"X"), uTC(u8"Y"));
-					ImPlot::PlotLine("##plot", res[i].x.data(), res[i].y.data(), res[i].y.size());
-					ImPlot::EndPlot();
-				}
-			}
-
-
-
-		}
-
-	}
-
-exEnd:
-	if (limExWin)
-	{
-		ImGui::Begin(uTC(u8"Ошибка!"), &limExWin, ImGuiWindowFlags_AlwaysAutoResize);
-		ImGui::Text(uTC(u8"Неверно введены пределы или функция"));
-		if (ImGui::Button(uTC(u8"Закрыть")))
-			limExWin = false;
-		ImGui::End();
-	}
-
-	ImGui::End();*/
 
 void Window::renderGUI() {
 	static double limA = 2.7182, limB = 5.7182;
 	static double solX = 2.7182, solY = 2;
 	static double h = 0.1;
-	static std::string sLimA = "2.7182", sLimB = "5.7182";
-	static std::string equation = "(1/x*y)*((y^2/ln(x))-1)";
+	static int num = 10;
+	static std::string sLimA = "exp(1)", sLimB = "exp(1)+3";
+	static std::string equation = "(1/(x*y))*(((y^2)/(ln(x)))-1)";
 	static std::string solution = "sqrt(2*(ln(x))^2+2*ln(x))";
 	static std::string sH = "0.1";
+	static std::string sSolX = "exp(1)";
+	static std::string sSolY = "2";
+	static bool sol = false, diff = false;
+	static bool resFlag = true, diffFlag = true;
 
 	static bool limExWin = false, isResReady = false;
 
@@ -215,7 +126,15 @@ void Window::renderGUI() {
 		ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoCollapse |
 		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
 		ImGuiWindowFlags_NoBringToFrontOnFocus);
+
+	float windowWidth = ImGui::GetContentRegionAvail().x;
+	float sliderWidth = windowWidth / 3.0f;
+	float textWidth = windowWidth / 2.0f;
+	ImGui::PushItemWidth(textWidth);
+
 	ImGui::LabelText("##label", uTC(u8"Решение задачи Коши: "));
+	ImGui::SameLine(textWidth+85);
+	ImGui::LabelText("###label", uTC(u8"Введите пределы x:"));
 
 	ImGui::BeginGroup();
 	ImGui::LabelText("###label", uTC(u8"y' = "));
@@ -231,10 +150,24 @@ void Window::renderGUI() {
 
 	ImGui::SameLine();
 	ImGui::BeginGroup();
-	ImGui::LabelText("###label", uTC(u8"Введите пределы x:"));
 	ImGui::InputText("###TBla", &sLimA);
 	ImGui::InputText("###TBlb", &sLimB);
+	ImGui::PushItemWidth(45);
+	ImGui::LabelText("###label", uTC(u8"y("));
+	ImGui::SameLine(15);
+	ImGui::InputText("###TBsx", &sSolX);
+	ImGui::SameLine(55);
+	ImGui::LabelText("###label", uTC(u8") = "));
+	ImGui::SameLine(85);
+	ImGui::InputText("###TBsy", &sSolY);
 	ImGui::EndGroup();
+
+	ImGui::PushItemWidth(sliderWidth);
+	ImGui::SliderInt(uTC(u8"n"), &num, 2, 50);
+
+	ImGui::Checkbox(uTC(u8"Результат"), &resFlag);
+	ImGui::SameLine();
+	ImGui::Checkbox(uTC(u8"Погрешность"), &diffFlag);
 
 	if(ImGui::Button(uTC(u8"Рассчитать"))){
 		mu::Parser parser;
@@ -245,28 +178,48 @@ void Window::renderGUI() {
 			limA = parser.Eval();
 			parser.SetExpr(sLimB);
 			limB = parser.Eval();
+			parser.SetExpr(sSolX);
+			solX = parser.Eval();
+			parser.SetExpr(sSolY);
+			solY = parser.Eval();
 		}
 		catch(mu::Parser::exception_type& e){
 			std::cerr << e.GetMsg() << std::endl;
 			limExWin = true;
 			isTheResultReady = false;
-			//goto exEnd;
+			goto exEnd;
 		}
-		res = getResultGraphics(limA, limB, solY, equation, h, solution);
+		if (resFlag) {
+			res = getResultGraphics(limA, limB, solY, equation, h, solution);
+		}
+		if (diffFlag) {
+			diffGraph = getDiffGraph(limA, limB, num, solY, equation, solution);
+		}
 		isTheResultReady = true;
-		if (isTheResultReady) {
-			ImGui::LabelText("##label", uTC(u8"Графики:"));
-
-			for (size_t i = 0; i < res.size(); i++){
-				if (ImPlot::BeginPlot(res[i].name.c_str())) {
-					ImPlot::SetupAxes(uTC(u8"X"), uTC(u8"Y"));
-					ImPlot::PlotLine("##plot", res[i].x.data(), res[i].y.data(), res[i].y.size());
-					ImPlot::EndPlot();
+	}
+	if (isTheResultReady) {
+		ImGui::LabelText("##label", uTC(u8"Графики решений:"));
+		if (resFlag) {
+			if (ImPlot::BeginPlot("Solution")) {
+				ImPlot::SetupAxes(uTC(u8"X"), uTC(u8"Y"));
+				for (size_t i = 0; i < res.size(); i++) {
+					ImPlot::PlotLine(res[i].name.c_str(), res[i].x.data(), res[i].y.data(), res[i].y.size());
 				}
+				ImPlot::EndPlot();
+			}
+		}
+
+		if (diffFlag) {
+			ImGui::LabelText("##label", uTC(u8"Графики погрешности:"));
+			if (ImPlot::BeginPlot("Difference")) {
+				ImPlot::SetupAxes(uTC(u8"H"), uTC(u8"D"));
+				for (size_t i = 0; i < diffGraph.size(); i++) {
+					ImPlot::PlotLine(diffGraph[i].name.c_str(), diffGraph[i].x.data(), diffGraph[i].y.data(), diffGraph[i].y.size());
+				}
+				ImPlot::EndPlot();
 			}
 		}
 	}
-
 exEnd:
 	if (limExWin)
 	{

@@ -15,12 +15,6 @@ double oneArgFun(string& fun, double x) {
 	parser.DefineVar("x", &x);
 	return parser.Eval();
 }
-void eqRebuild(string& s) {
-	int equalSign = s.find('=');
-	string right = s.substr(equalSign + 1);
-	s.clear();
-	s = right;
-}
 
 struct graph {
 	vector<double> x;
