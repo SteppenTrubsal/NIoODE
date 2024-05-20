@@ -73,6 +73,27 @@ graph thirdAdamsGraph(double a, double b, double sol, string& func, double h) {
 	return res;
 }
 
+//########################################IDZ##################################
+
+void fourthAdams(double h, string& func, vector<double>& X, vector<double>& Y) {
+	for (size_t i = 3; i < X.size() - 1;i++) {
+		Y[i + 1] = Y[i] + (h / 24) * (55 * fun(func, X[i], Y[i]) - 59 * fun(func, X[i - 1], Y[i - 1]) + 37 * fun(func, X[i - 2], Y[i - 2]) - 9 * fun(func, X[i - 3], Y[i - 3]));
+	}
+}
+graph fourthAdamsGraph(double a, double b, double sol, string& func, double h) {
+	graph res;
+	res.name = "Four-step Adams method";
+	res.x = getX(a, b, h);
+	res.y = vector<double>(res.x.size());
+	res.y[0] = sol;
+	vector<double> x01 = getSpline(res.x, 0, 4);
+	RungeKutta(h, func, x01, res.y);
+	fourthAdams(h, func, res.x, res.y);
+	return res;
+}
+
+//########################################IDZ##################################
+
 void analSol(double h, string& func, vector<double>& X, vector<double>& Y) {
 	for (size_t i = 0; i < X.size(); i++) {
 		Y[i] = oneArgFun(func, X[i]);
@@ -88,13 +109,14 @@ graph analSolGraph(double a, double b, string& func, double h) {
 }
 
 vector<graph> getResultGraphics(double a, double b, double sol, string& func, double h, string& analSol) {
-	vector<graph> result(5);
+	vector<graph> result(6);
 
 	result[0] = EulerGraph(a, b, sol, func, h);
 	result[1] = RungeKuttaGraph(a, b, sol, func, h);
 	result[2] = secondAdamsGraph(a, b, sol, func, h);
 	result[3] = thirdAdamsGraph(a, b, sol, func, h);
-	result[4] = analSolGraph(a, b, analSol, h);
+	result[4] = fourthAdamsGraph(a, b, sol, func, h);
+	result[5] = analSolGraph(a, b, analSol, h);
 
 	return result;
 }
@@ -104,12 +126,13 @@ vector<graph> getDiffGraph(double a, double b, double n, double sol, string& fun
 	double hMin = (b - a) / 1000;
 	double it = (hMax - hMin) / (n-1);
 
-	vector<graph> diffGraphics(4);
+	vector<graph> diffGraphics(5);
 	vector<double> H;
 	diffGraphics[0].name = "Euler";
 	diffGraphics[1].name = "Runge-Kutta";
 	diffGraphics[2].name = "Two-step Adams method";
 	diffGraphics[3].name = "Three-step Adams method";
+	diffGraphics[4].name = "Four-step Adams method";
 
 	for (size_t i = 0; i < n; i++) {
 		H.push_back(hMin + it * i);
@@ -119,10 +142,11 @@ vector<graph> getDiffGraph(double a, double b, double n, double sol, string& fun
 		for (size_t j = 0; j < diffGraphics.size(); j++) {
 			diffGraphics[j].x.push_back(H[i]);
 		}
-		diffGraphics[0].y.push_back(getDiff(temp[0], temp[4]));
-		diffGraphics[1].y.push_back(getDiff(temp[1], temp[4]));
-		diffGraphics[2].y.push_back(getDiff(temp[2], temp[4]));
-		diffGraphics[3].y.push_back(getDiff(temp[3], temp[4]));
+		diffGraphics[0].y.push_back(getDiff(temp[0], temp[5]));
+		diffGraphics[1].y.push_back(getDiff(temp[1], temp[5]));
+		diffGraphics[2].y.push_back(getDiff(temp[2], temp[5]));
+		diffGraphics[3].y.push_back(getDiff(temp[3], temp[5]));
+		diffGraphics[4].y.push_back(getDiff(temp[4], temp[5]));
 	}
 	return diffGraphics;
 }
