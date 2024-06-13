@@ -1,0 +1,1 @@
+include("C:/src/vcpkg/vcpkg/scripts/buildsystems/vcpkg.cmake")
